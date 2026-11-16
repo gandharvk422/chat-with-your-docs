@@ -1,23 +1,26 @@
 from dotenv import load_dotenv
 
-load_dotenv()  # reads GROQ_API_KEY from a .env file
+load_dotenv()
 
 from embed import embed_and_store
 from chain import build_chain
 from hybrid import build_hybrid_reranker
 
-PDF_PATH = "test.pdf"
+PDF_PATH = "resume.pdf"
 
 if __name__ == "__main__":
+    print("=========Embed and Store=========")
     # 1. Once per upload: load, chunk, embed, store
     vectorstore, chunks = embed_and_store(PDF_PATH)
     print(f"Stored {len(chunks)} chunks\n")
 
+    print("=========Chain and Reranking=========")
     # 2. Build the chain and the reranker once
     retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
     chain = build_chain(retriever)
     hybrid_rerank = build_hybrid_reranker(chunks, vectorstore)
 
+    print("=========Question-Answering=========")
     # 3. Per question: reuse everything
     while True:
         question = input("\nAsk a question (or 'quit'): ").strip()

@@ -20,10 +20,10 @@ Answer:"""
 )
 
 
-def format_pdfs(pdfs):
+def format_docs(docs):
     """Turn retrieved chunks into one context string, with file name and page."""
     parts = []
-    for d in pdfs:
+    for d in docs:
         name = os.path.basename(d.metadata.get("source", "unknown"))
         page = d.metadata.get("page")
         label = f"{name}, page {page + 1}" if page is not None else name
@@ -39,7 +39,7 @@ def build_chain(retriever):
     llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0)
 
     return (
-        {"context": retriever | format_pdfs, "question": RunnablePassthrough()}
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
         | RAG_PROMPT
         | llm
         | StrOutputParser()
