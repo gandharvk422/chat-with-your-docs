@@ -1,201 +1,102 @@
 # Chat with Your Docs
 
-**Chat with Your Docs** is a Retrieval-Augmented Generation (RAG) web application that lets you upload a document and ask questions about its contents. It combines a React interface, a FastAPI backend, local Hugging Face embedding and reranking models, ChromaDB vector storage, and the Groq API for answer generation.
+A small RAG app I built so I could upload a document and ask it questions. You drop in a file, wait a few seconds while it gets indexed, and then chat with it. Answers come back with the file (and page or slide, when that's available) they were pulled from.
 
-The application retrieves relevant passages from the uploaded document before generating an answer. It also returns source information so you can see which file—and, where available, which page or slide—was used.
+The stack is React on the front, FastAPI on the back, ChromaDB for vectors, and Groq for the actual answer generation. The embedding and reranking models run locally on your machine.
 
-## Features
+It handles PDF, DOCX, PPTX, TXT, Markdown and CSV files.
 
-- **Document upload:** Upload PDF, DOCX, PPTX, TXT, Markdown, and CSV files.
-- **Document-aware Q&A:** Ask natural-language questions about the uploaded file.
-- **Hybrid retrieval:** Combines BM25 keyword retrieval with ChromaDB vector similarity.
-- **Cross-encoder reranking:** Reorders retrieved passages by relevance before they reach the language model.
-- **Source references:** Displays the source filename and page number when page metadata is available.
-- **Grounded responses:** The prompt instructs the model to answer only from retrieved context and to say when the context does not contain enough information.
-- **React interface:** Includes drag-and-drop upload, chat, source details, and light/dark themes.
-- **Local retrieval models:** Embedding and reranking models run locally; answer generation uses Groq.
+## How it works
 
-## Application workflow
+When you upload a file, the backend checks the type and size (20 MB max), pulls the text out with a loader that matches the format, and splits it into chunks of 800 characters with a 100 character overlap. Each chunk is embedded with `BAAI/bge-small-en-v1.5` and stored in ChromaDB.
 
-1. The user uploads a document through the React frontend.
-2. FastAPI validates the file type, checks its contents, and enforces a 20 MB upload limit.
-3. The backend extracts text using a format-specific loader.
-4. Extracted documents are split into chunks of 800 characters with 100 characters of overlap.
-5. The chunks are embedded with `BAAI/bge-small-en-v1.5` and stored in ChromaDB.
-6. For each question, the retriever combines BM25 and vector search results (40% and 60% weights respectively).
-7. Candidate passages are deduplicated and reranked using `cross-encoder/ms-marco-MiniLM-L-6-v2`.
-8. The four highest-ranked passages are passed to the Groq-hosted `openai/gpt-oss-120b` model.
-9. The API returns the generated answer and its source references to the frontend.
-
-### RAG pipeline
+When you ask a question, two searches run side by side: BM25 for keyword matching and a vector search against Chroma. Results are merged (40% BM25, 60% vector), deduplicated, and then reranked with `cross-encoder/ms-marco-MiniLM-L-6-v2`. The top 4 passages go to `openai/gpt-oss-120b` on Groq along with your question. The prompt tells the model to stick to the provided context and say so if the answer isn't there.
 
 ```text
-                         DOCUMENT INGESTION
-                                  |
-                                  v
-                         React file upload
-                                  |
-                                  v
-                            FastAPI /upload
-                                  |
-                                  v
-                       File validation & loading
-                                  |
-                                  v
-                       Text extraction by format
-                                  |
-                                  v
-                    Recursive character splitting
-                       (800 size / 100 overlap)
-                                  |
-                                  v
-                   Hugging Face embeddings
-                    BAAI/bge-small-en-v1.5
-                                  |
-                                  v
-                              ChromaDB
-                                  |
-                                  |
-                         QUESTION ANSWERING
-                                  |
-                                  v
-                          React chat input
-                                  |
-                                  v
-                            FastAPI /chat
-                                  |
-                                  v
-                       Hybrid retrieval search
-                       /                    \
-                      v                      v
-                BM25 keyword          ChromaDB vector
-                  search                  search
-                    \                    /
-                     \                  /
-                      v                v
-                       Ensemble retrieval
-                       (40% BM25 / 60% vector)
-                                  |
-                                  v
-                         Candidate deduplication
-                                  |
-                                  v
-                         Cross-encoder reranking
-                                  |
-                                  v
-                           Top 4 passages
-                                  |
-                                  v
-                       Context + question prompt
-                                  |
-                                  v
-                         Groq: gpt-oss-120b
-                                  |
-                                  v
-                      Answer + source references
-                                  |
-                                  v
-                           React chat UI
+Upload:  file -> /upload -> validate + load -> split -> embed -> ChromaDB
+
+Chat:    question -> /chat -> BM25 + vector search -> merge + dedupe
+                           -> cross-encoder rerank -> top 4 -> Groq -> answer + sources
 ```
 
 ## Tech stack
 
-| Layer | Technologies |
-|---|---|
-| Frontend | React 18, Vite, JavaScript, CSS |
-| Backend API | Python, FastAPI, Uvicorn |
-| RAG orchestration | LangChain |
-| Document loading | PyPDF, Docx2txt, python-pptx, Python CSV/text readers |
-| Text splitting | `RecursiveCharacterTextSplitter` |
-| Embeddings | Hugging Face `BAAI/bge-small-en-v1.5` |
-| Vector database | ChromaDB |
-| Keyword retrieval | BM25 with `rank_bm25` |
-| Hybrid retrieval | LangChain `EnsembleRetriever` |
-| Reranking | Sentence Transformers `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-| LLM | Groq API — `openai/gpt-oss-120b` |
+- **Frontend:** React 18, Vite, plain CSS
+- **Backend:** Python, FastAPI, Uvicorn
+- **RAG plumbing:** LangChain (`RecursiveCharacterTextSplitter`, `EnsembleRetriever`)
+- **Loaders:** PyPDF, Docx2txt, python-pptx, and the standard library for CSV and text
+- **Embeddings:** `BAAI/bge-small-en-v1.5` via Hugging Face
+- **Vector store:** ChromaDB
+- **Keyword search:** BM25 (`rank_bm25`)
+- **Reranker:** `cross-encoder/ms-marco-MiniLM-L-6-v2` via Sentence Transformers
+- **LLM:** `openai/gpt-oss-120b` on Groq
 
-## Supported document formats
+## Supported files
 
-| Format | Extraction approach | Source location |
+| Format | How text is extracted | What the source shows |
 |---|---|---|
 | PDF | PyPDFLoader | Page number |
-| DOCX | Docx2txtLoader | Filename |
-| PPTX | Extracts slide text and table contents | Slide number |
-| TXT | Text file reader | Filename |
-| MD | Text file reader | Filename |
-| CSV | Converts each row into `column: value` text | Filename |
+| DOCX | Docx2txt | Filename only |
+| PPTX | Slide text and table contents | Slide number |
+| TXT / MD | Plain text read | Filename only |
+| CSV | Each row becomes `column: value` text | Filename only |
 
-The upload limit is **20 MB per file**. Legacy `.doc`, `.ppt`, `.xls`, and `.xlsx` files are not supported; convert them to `.docx`, `.pptx`, or `.csv` respectively.
+Old formats (`.doc`, `.ppt`, `.xls`, `.xlsx`) aren't supported. Convert them to `.docx`, `.pptx` or `.csv` first. Scanned PDFs and image-only documents won't work well either, since there's no OCR step.
 
-Scanned PDFs and image-only documents are not OCR-processed. They may fail to produce usable text.
-
-## Repository structure
+## Project layout
 
 ```text
 chat-with-your-docs/
 ├── backend/
-│   ├── chain.py             # RAG prompt, answer generation, and source formatting
-│   ├── chunks.py            # File validation, document loaders, and text splitting
-│   ├── embed.py             # Hugging Face embeddings and ChromaDB operations
-│   ├── hybrid.py            # BM25 + vector retrieval and cross-encoder reranking
-│   ├── main.py              # FastAPI application and API endpoints
-│   └── test_pipeline.py     # Standalone terminal pipeline test
-│
+│   ├── chain.py            # prompt, answer generation, source formatting
+│   ├── chunks.py           # file validation, loaders, text splitting
+│   ├── embed.py            # embeddings and ChromaDB
+│   ├── hybrid.py           # BM25 + vector retrieval, reranking
+│   ├── main.py             # FastAPI app and endpoints
+│   └── test_pipeline.py    # terminal-only pipeline test
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx          # Main React application and API integration
-│   │   ├── App.css          # Application styling and themes
-│   │   └── main.jsx         # React entry point
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── main.jsx
 │   ├── index.html
 │   ├── package.json
 │   └── vite.config.js
-│
-├── .gitignore
-├── .python-version
 ├── pyproject.toml
 ├── uv.lock
 └── README.md
 ```
 
-## Getting started
+## Running it locally
 
-### Prerequisites
+You'll need Python 3.13+, Node.js with npm, and a [Groq API key](https://console.groq.com/keys). The first run also needs internet access to download the Hugging Face models.
 
-Make sure you have:
-
-- Python **3.13 or later** (the project configuration specifies `>=3.13`).
-- Node.js and npm.
-- A [Groq API key](https://console.groq.com/keys).
-- Internet access on the first run to download the Hugging Face models and call the Groq API.
-
-> The embedding and cross-encoder models run locally. The Groq API key is required for generating answers.
-
-### 1. Clone the repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/gandharvk422/chat-with-your-docs.git
 cd chat-with-your-docs
 ```
 
-### 2. Configure the backend
+### 2. Backend setup
 
-Create and activate a virtual environment from the repository root:
+Create a virtual environment from the repo root.
 
-**Windows (PowerShell)**
+Windows (PowerShell):
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-**macOS / Linux**
+macOS / Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install the backend dependencies:
+Then install the dependencies:
 
 ```bash
 python -m pip install --upgrade pip
@@ -205,36 +106,36 @@ pip install fastapi "uvicorn[standard]" python-multipart python-dotenv pydantic 
     pypdf docx2txt python-pptx sentence-transformers rank_bm25
 ```
 
-Create a `.env` file inside the **repository root** (the backend loads environment variables when it starts):
+I'm listing the packages by hand because `pyproject.toml` only covers some of what the backend imports. That's on my list to fix.
+
+Create a `.env` file in the repo root:
 
 ```env
 GROQ_API_KEY=your_groq_api_key
 ```
 
-Do not commit your `.env` file or expose your API key.
+Keep that file out of git.
 
 ### 3. Start the backend
-
-From the repository root, run:
 
 ```bash
 cd backend
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-On startup, the backend clears its local ChromaDB directory and loads the embedding and cross-encoder models. The first startup can take longer because the models need to be downloaded.
+The first start is slow because the models have to download. On every start the backend also wipes `backend/chroma_db/`, so nothing you've indexed survives a restart.
 
-The API will be available at:
+Once it's up:
 
-- API base URL: `http://127.0.0.1:8000`
-- Interactive API documentation: `http://127.0.0.1:8000/docs`
+- API: `http://127.0.0.1:8000`
+- Swagger docs: `http://127.0.0.1:8000/docs`
 - Health check: `http://127.0.0.1:8000/health`
 
-Keep this terminal running.
+Leave that terminal open.
 
 ### 4. Start the frontend
 
-Open a second terminal and navigate to the frontend directory:
+In a second terminal:
 
 ```bash
 cd frontend
@@ -242,44 +143,34 @@ npm install
 npm run dev
 ```
 
-Vite prints the local development URL in the terminal (normally `http://localhost:5173`). Open that URL in your browser.
-
-The frontend uses `http://127.0.0.1:8000` as its default backend URL. To override it, create `frontend/.env`:
+Vite will print a URL, usually `http://localhost:5173`. Open it. The frontend talks to `http://127.0.0.1:8000` by default; if your backend lives somewhere else, put this in `frontend/.env` and restart Vite:
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-Restart the Vite development server after changing frontend environment variables.
+## Using it
 
-## Using the application
+Pick a file or drag it onto the upload area, wait for indexing to finish, then type a question. Each answer has a **Sources** section you can expand to see where it came from.
 
-1. Open the frontend in your browser.
-2. Select a supported document or drag and drop it into the upload area.
-3. Wait for the upload and indexing process to finish.
-4. Enter a question in the chat input and submit it.
-5. Read the answer and expand the **Sources** section to inspect the returned file and page references.
+Uploading a new file replaces the old one. The app only keeps one active document at a time, and it isn't built for multiple users.
 
-A new upload replaces the currently indexed document. This version is designed for one active document at a time, not multiple users or independent document collections.
+## API
 
-## API reference
+There are three endpoints:
 
-The backend currently exposes three endpoints:
-
-| Method | Endpoint | Purpose |
+| Method | Endpoint | What it does |
 |---|---|---|
-| `GET` | `/health` | Returns API status, model-loading status, and the active document filename. |
-| `POST` | `/upload` | Accepts a document as multipart form data under the `file` field, validates it, and indexes it. |
-| `POST` | `/chat` | Accepts a question as JSON and returns an answer with source references. |
+| GET | `/health` | Status, whether the models have loaded, and the current filename |
+| POST | `/upload` | Takes a file (multipart, field name `file`) and indexes it |
+| POST | `/chat` | Takes a question as JSON and returns an answer plus sources |
 
-### Upload a document
+Upload:
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/upload" \
   -F "file=@/path/to/your-document.pdf"
 ```
-
-Successful response:
 
 ```json
 {
@@ -289,9 +180,9 @@ Successful response:
 }
 ```
 
-The `chunks` value depends on the document's extracted text.
+The chunk count depends on how much text was extracted.
 
-### Ask a question
+Chat:
 
 ```bash
 curl -X POST "http://127.0.0.1:8000/chat" \
@@ -299,77 +190,63 @@ curl -X POST "http://127.0.0.1:8000/chat" \
   -d "{\"question\":\"What is this document about?\"}"
 ```
 
-Response shape:
-
 ```json
 {
   "answer": "The answer generated from the retrieved document context.",
   "sources": [
-    {
-      "file": "your-document.pdf",
-      "page": 2
-    }
+    { "file": "your-document.pdf", "page": 2 }
   ]
 }
 ```
 
-The `page` field is included when page metadata is available. The backend converts zero-based PDF page metadata to human-readable, one-based page numbers. PPTX slide metadata is also represented through the page field. Other supported formats may return only the filename.
+`page` only shows up when the loader provides it (PDF and PPTX). PDF pages are zero-based internally, and the backend converts them to normal page numbers. The question has to be non-empty and no longer than 1,000 characters, and you need to have uploaded a document first.
 
-The `/chat` endpoint requires a non-empty question of at most 1,000 characters and requires a document to have been uploaded first.
+## Settings
 
-## Configuration
+Everything is hardcoded in the source for now:
 
-The main configuration values are currently defined in the source files:
-
-| Setting | Location | Current value |
+| Setting | File | Value |
 |---|---|---|
-| Maximum upload size | `backend/main.py` | 20 MB |
-| Chunk size | `backend/chunks.py` | 800 characters |
-| Chunk overlap | `backend/chunks.py` | 100 characters |
+| Max upload size | `backend/main.py` | 20 MB |
+| Chunk size / overlap | `backend/chunks.py` | 800 / 100 characters |
 | Embedding model | `backend/embed.py` | `BAAI/bge-small-en-v1.5` |
-| Vector database directory | `backend/embed.py` | `backend/chroma_db/` |
+| Vector DB directory | `backend/embed.py` | `backend/chroma_db/` |
 | BM25 / vector weights | `backend/hybrid.py` | 0.4 / 0.6 |
-| Initial candidates per retriever | `backend/hybrid.py` | 5 |
-| Reranked passages sent to the LLM | `backend/main.py` | 4 |
-| Cross-encoder model | `backend/hybrid.py` | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
-| Groq chat model | `backend/chain.py` | `openai/gpt-oss-120b` |
+| Candidates per retriever | `backend/hybrid.py` | 5 |
+| Cross-encoder | `backend/hybrid.py` | `cross-encoder/ms-marco-MiniLM-L-6-v2` |
+| Passages sent to the LLM | `backend/main.py` | 4 |
+| Groq model | `backend/chain.py` | `openai/gpt-oss-120b` |
 | Frontend API URL | `frontend/src/App.jsx` | `http://127.0.0.1:8000` |
 
-## Running the pipeline test
+## Testing the pipeline without the UI
 
-The repository also includes a terminal-based pipeline test. Place a sample PDF named `test.pdf` inside the `backend/` directory, then run:
+Put a PDF called `test.pdf` in `backend/` and run:
 
 ```bash
 cd backend
 python test_pipeline.py
 ```
 
-The script resets the local vector database, indexes the PDF, builds the hybrid retriever and RAG chain, and starts an interactive question-answering loop. Enter `quit`, `exit`, or an empty input to stop.
+It resets the vector DB, indexes the PDF, builds the retriever and chain, and drops you into a Q&A loop in the terminal. Type `quit`, `exit`, or just hit enter on an empty line to stop.
 
-## Important implementation notes
+## Things to know
 
-- **One active document:** Each upload builds a new collection and replaces the previously active document. The application is not currently configured for per-user or multi-document isolation.
-- **Database lifecycle:** The backend deletes `backend/chroma_db/` at startup. Uploaded document embeddings therefore do not persist across backend restarts.
-- **Local model downloads:** Hugging Face models are downloaded on first use and cached by the local model tooling.
-- **Grounding is prompt-based:** The prompt tells the LLM to use only retrieved context. RAG reduces unsupported answers but does not guarantee that a generated answer is always correct.
-- **Citations depend on loader metadata:** Page/slide references are available for PDF and PPTX documents. DOCX, TXT, Markdown, and CSV source references currently identify the file only.
-- **CORS:** The API currently permits the Vite development origins `localhost:5173` and `127.0.0.1:5173`.
-- **Dependency configuration:** `pyproject.toml` currently lists only a subset of the packages imported by the backend. The explicit installation command above includes the runtime packages used by the current source files.
+- Only one document is active at a time. Each upload replaces the last.
+- The Chroma directory is deleted on startup, so embeddings don't persist.
+- Grounding is done through the prompt only. It cuts down on made-up answers but doesn't rule them out, so double-check anything important.
+- Page and slide references only exist for PDF and PPTX. For everything else you get the filename.
+- CORS only allows the Vite dev origins (`localhost:5173` and `127.0.0.1:5173`).
 
-## Potential improvements
+## What I'd like to add
 
-- Add persistent, per-user document collections and support multiple active documents.
-- Add OCR for scanned PDFs and image-based documents.
-- Add automated retrieval and answer evaluation (for example, with a RAG evaluation framework).
-- Add automated tests for file loaders, retrieval quality, and API endpoints.
-- Move model names, chunking settings, and upload limits into environment-based configuration.
-- Improve citation granularity for formats that do not currently expose page metadata.
-- Add production deployment configuration, authentication, and stricter CORS settings.
+- Persistent, per-user collections and support for several documents at once
+- OCR for scanned PDFs
+- Proper retrieval and answer evaluation
+- Tests for the loaders, retrieval quality and endpoints
+- Config through environment variables instead of constants in the code
+- Finer-grained citations for DOCX, TXT, Markdown and CSV
+- Auth, stricter CORS and a real deployment setup
 
-## Acknowledgements
+## Credits
 
-The RAG pipeline was informed by the tutorial [Build a RAG System from Scratch](https://nerdleveltech.com/guides/rag-hands-on-tutorial), with the implementation adapted to this application's document loaders, hybrid retrieval, reranking, FastAPI backend, and React frontend.
-
----
-
-**Built with Python, LangChain, FastAPI, React, ChromaDB, Hugging Face, and Groq.**
+The RAG pipeline started from the tutorial [Build a RAG System from Scratch](https://nerdleveltech.com/guides/rag-hands-on-tutorial). I adapted it with my own loaders, hybrid retrieval, reranking, FastAPI backend and React frontend.
