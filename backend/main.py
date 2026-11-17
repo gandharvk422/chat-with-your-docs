@@ -2,9 +2,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from embed import embed_and_store
-from chain import build_chain
-from hybrid import build_hybrid_reranker
+from backend.embed import embed_and_store
+from backend.chain import build_chain
+from backend.hybrid import build_hybrid_reranker
 
 PDF_PATH = "resume.pdf"
 

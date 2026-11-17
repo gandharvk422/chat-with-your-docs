@@ -4,7 +4,7 @@ import shutil
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
-from chunks import fetch_pdf, chunk_pdf
+from backend.chunks import fetch_pdf, chunk_pdf
 
 DB_PATH = "./chroma_db"
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
