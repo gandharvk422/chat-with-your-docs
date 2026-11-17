@@ -1,6 +1,6 @@
 # Chat with Your Docs
 
-A small RAG app I built so I could upload a document and ask it questions. You drop in a file, wait a few seconds while it gets indexed, and then chat with it. Answers come back with the file (and page or slide, when that's available) they were pulled from.
+A RAG web app that lets you upload a document and ask questions about it. You drop in a file, wait for it to get indexed, and then chat with it. Answers come back with the file (and page or slide, when that's available) they were pulled from.
 
 The stack is React on the front, FastAPI on the back, ChromaDB for vectors, and Groq for the actual answer generation. The embedding and reranking models run locally on your machine.
 
@@ -106,7 +106,7 @@ pip install fastapi "uvicorn[standard]" python-multipart python-dotenv pydantic 
     pypdf docx2txt python-pptx sentence-transformers rank_bm25
 ```
 
-I'm listing the packages by hand because `pyproject.toml` only covers some of what the backend imports. That's on my list to fix.
+I'm listing the packages by hand because `pyproject.toml` only covers some of what the backend imports.
 
 Create a `.env` file in the repo root:
 
@@ -236,17 +236,3 @@ It resets the vector DB, indexes the PDF, builds the retriever and chain, and dr
 - Grounding is done through the prompt only. It cuts down on made-up answers but doesn't rule them out, so double-check anything important.
 - Page and slide references only exist for PDF and PPTX. For everything else you get the filename.
 - CORS only allows the Vite dev origins (`localhost:5173` and `127.0.0.1:5173`).
-
-## What I'd like to add
-
-- Persistent, per-user collections and support for several documents at once
-- OCR for scanned PDFs
-- Proper retrieval and answer evaluation
-- Tests for the loaders, retrieval quality and endpoints
-- Config through environment variables instead of constants in the code
-- Finer-grained citations for DOCX, TXT, Markdown and CSV
-- Auth, stricter CORS and a real deployment setup
-
-## Credits
-
-The RAG pipeline started from the tutorial [Build a RAG System from Scratch](https://nerdleveltech.com/guides/rag-hands-on-tutorial). I adapted it with my own loaders, hybrid retrieval, reranking, FastAPI backend and React frontend.
