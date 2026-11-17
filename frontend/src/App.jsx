@@ -7,9 +7,9 @@ import {
 // ---- Config -------------------------------------------------------------
 // USE_MOCK = true  -> the UI works on its own with fake answers (no backend).
 // USE_MOCK = false -> it calls your FastAPI backend at API_URL.
-const USE_MOCK = true;
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const ALLOWED = ["pdf", "txt", "docx"];
+const USE_MOCK = false;
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const ALLOWED = ["pdf", "docx", "pptx", "txt", "md", "csv"];
 const MAX_MB = 20;
 
 const extOf = (name) => name.split(".").pop().toLowerCase();
@@ -17,12 +17,28 @@ const sizeLabel = (b) => (b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---- API calls (the only place that talks to the backend) ---------------
+
+// Read the backend's error message ({"detail": "..."}) or use a fallback.
+async function errorMessage(res, fallback) {
+  const data = await res.json().catch(() => ({}));
+  return typeof data.detail === "string" ? data.detail : fallback;
+}
+
+// fetch() that turns "server unreachable" into a readable message.
+async function request(path, options) {
+  try {
+    return await fetch(`${API_URL}${path}`, options);
+  } catch {
+    throw new Error("Can't reach the server. Make sure the backend is running.");
+  }
+}
+
 async function uploadFile(file) {
   if (USE_MOCK) return wait(1200);
   const body = new FormData();
   body.append("file", file);
-  const res = await fetch(`${API_URL}/upload`, { method: "POST", body });
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || "Upload failed.");
+  const res = await request("/upload", { method: "POST", body });
+  if (!res.ok) throw new Error(await errorMessage(res, "Upload failed. Try again."));
 }
 
 async function askQuestion(question, fileName) {
@@ -33,12 +49,12 @@ async function askQuestion(question, fileName) {
       sources: [{ file: fileName, page: 1 }],
     };
   }
-  const res = await fetch(`${API_URL}/chat`, {
+  const res = await request("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question }),
   });
-  if (!res.ok) throw new Error("The server could not answer. Try again.");
+  if (!res.ok) throw new Error(await errorMessage(res, "The server could not answer. Try again."));
   return res.json(); // { answer: string, sources: [{ file, page? }] }
 }
 
@@ -92,7 +108,7 @@ export default function App() {
     if (!f) return;
     if (!ALLOWED.includes(extOf(f.name))) {
       setStatus("error");
-      setError(`.${extOf(f.name)} files aren't supported. Upload a PDF, TXT or DOCX file.`);
+      setError(`.${extOf(f.name)} files aren't supported. Supported: ${ALLOWED.map((e) => e.toUpperCase()).join(", ")}.`);
       return;
     }
     if (f.size > MAX_MB * 1024 * 1024) {
@@ -188,14 +204,14 @@ export default function App() {
               <div className="hero-art"><UploadCloud size={72} strokeWidth={1.5} /></div>
               <div>
                 <h2>Chat with Your Documents</h2>
-                <p>Upload a PDF, TXT or DOCX file, and ask questions about its content using the power of RAG.</p>
+                <p>Upload a document, and ask questions about its content using the power of RAG.</p>
               </div>
             </section>
 
             <section className="card upload">
               <div className="up-left">
                 <h3><UploadCloud size={22} /> 1. Upload your file</h3>
-                <p className="muted">Supported formats: PDF, TXT, DOCX</p>
+                <p className="muted">Supported formats: PDF, DOCX, PPTX, TXT, MD, CSV</p>
                 <div
                   className={`drop ${dragging ? "over" : ""}`}
                   onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -207,7 +223,7 @@ export default function App() {
                   <span className="muted">or</span>
                   <label className="btn">
                     <FolderOpen size={18} /> Choose file
-                    <input type="file" hidden accept=".pdf,.txt,.docx"
+                    <input type="file" hidden accept={ALLOWED.map((e) => `.${e}`).join(",")}
                       onChange={(e) => { handleFile(e.target.files[0]); e.target.value = ""; }} />
                   </label>
                 </div>

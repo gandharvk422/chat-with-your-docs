@@ -20,4 +20,5 @@ dist/
 # OS / editor
 .DS_Store
 .vscode/
-*.pdf
+backend/test.pdf
+chroma_db/

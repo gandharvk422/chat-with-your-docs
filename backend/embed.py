@@ -1,6 +1,7 @@
 import os
 import shutil
 from pathlib import Path
+from uuid import uuid4
 
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -21,6 +22,9 @@ def get_embeddings():
         _embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     return _embeddings
 
+def reset_db():
+    """Delete the whole database folder. Call ONLY at startup, before anything has opened it (deleting an open database fails on Windows)."""
+    shutil.rmtree(DB_PATH, ignore_errors=True)
 
 def embed_and_store(file):
     """
@@ -32,12 +36,16 @@ def embed_and_store(file):
     """
     chunks = chunk_doc(fetch_doc(file))
 
-    if os.path.exists(DB_PATH):
-        shutil.rmtree(DB_PATH)
+    if not chunks:
+        raise ValueError(
+            "No readable text found in this file. "
+            "Scanned documents (images of text) are not supported yet."
+        )
 
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=get_embeddings(),
+        collection_name = f"doc_{uuid4().hex[:8]}",
         persist_directory=DB_PATH,
     )
     return vectorstore, chunks

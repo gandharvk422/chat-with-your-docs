@@ -4,6 +4,15 @@ from sentence_transformers import CrossEncoder
 
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
+_cross_encoder = None
+
+def get_cross_encoder():
+    """Load the cross-encoder once and reuse it afterwards."""
+    global _cross_encoder
+    if _cross_encoder is None:
+        _cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL)
+    return _cross_encoder
+
 
 def build_hybrid_reranker(chunks, vectorstore):
     """
@@ -23,10 +32,7 @@ def build_hybrid_reranker(chunks, vectorstore):
         weights=[0.4, 0.6],
     )
 
-    # Cross-encoder reranker (runs locally, no API key)
-    print(f"[RERANK] Loading {CROSS_ENCODER_MODEL}...")
-    cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL)
-    print("[RERANK] Model ready\n")
+    cross_encoder = get_cross_encoder()
 
     def hybrid_rerank(query, top_n=3):
         # 1. Hybrid retrieval
