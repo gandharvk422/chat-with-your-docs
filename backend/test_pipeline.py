@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -6,12 +8,16 @@ from embed import embed_and_store
 from chain import build_chain
 from hybrid import build_hybrid_reranker
 
-DOC_PATH = "resume.pdf"
+# Put a sample PDF named test.pdf in the backend folder (or change this name)
+DOC_PATH = Path(__file__).parent / "test.pdf"
 
 if __name__ == "__main__":
+    if not DOC_PATH.exists():
+        raise SystemExit(f"File not found: {DOC_PATH}. Add a sample PDF there.")
+
     print("=========Embed and Store=========")
     # 1. Once per upload: load, chunk, embed, store
-    vectorstore, chunks = embed_and_store(DOC_PATH)
+    vectorstore, chunks = embed_and_store(str(DOC_PATH))
     print(f"Stored {len(chunks)} chunks\n")
 
     print("=========Chain and Reranking=========")

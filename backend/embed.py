@@ -1,12 +1,14 @@
 import os
 import shutil
+from pathlib import Path
 
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from chunks import fetch_doc, chunk_doc
 
-DB_PATH = "./chroma_db"
+# Always inside the backend folder, no matter where Python is started from
+DB_PATH = str(Path(__file__).parent / "chroma_db")
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
 _embeddings = None

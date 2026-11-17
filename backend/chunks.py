@@ -7,11 +7,12 @@ def fetch_doc(file):
     loader = PyPDFLoader(file)
     return loader.load()
 
-def chunk_doc(file):
+
+def chunk_doc(docs):
     """Split the page Documents into smaller chunk Documents."""
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=800,
         chunk_overlap=100,
         separators=["\n\n", "\n", ". ", " ", ""],
     )
-    return splitter.split_documents(file)
+    return splitter.split_documents(docs)
