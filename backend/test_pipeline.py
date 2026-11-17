@@ -2,16 +2,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from backend.embed import embed_and_store
-from backend.chain import build_chain
-from backend.hybrid import build_hybrid_reranker
+from embed import embed_and_store
+from chain import build_chain
+from hybrid import build_hybrid_reranker
 
-PDF_PATH = "resume.pdf"
+DOC_PATH = "resume.pdf"
 
 if __name__ == "__main__":
     print("=========Embed and Store=========")
     # 1. Once per upload: load, chunk, embed, store
-    vectorstore, chunks = embed_and_store(PDF_PATH)
+    vectorstore, chunks = embed_and_store(DOC_PATH)
     print(f"Stored {len(chunks)} chunks\n")
 
     print("=========Chain and Reranking=========")

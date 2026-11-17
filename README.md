@@ -79,7 +79,7 @@ Add `.env` and `chroma_db/` to your `.gitignore`. Never commit your API key.
 
 **3. Add a PDF**
 
-Put a PDF named `test.pdf` in the project folder, or change `PDF_PATH` in `main.py`.
+Put a PDF named `test.pdf` in the project folder, or change `DOC_PATH` in `main.py`.
 
 ## Usage
 
