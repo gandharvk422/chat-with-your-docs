@@ -9,7 +9,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from chunks import fetch_doc, chunk_doc
 
 # Always inside the backend folder, no matter where Python is started from
-DB_PATH = str(Path(__file__).parent / "chroma_db")
+DB_PATH = "/tmp/chroma_db" if os.getenv("VERCEL") else str(Path(__file__).parent / "chroma_db")
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 
 _embeddings = None
