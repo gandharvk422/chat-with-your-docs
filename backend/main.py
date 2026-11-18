@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
 
+load_dotenv()  # read GROQ_API_KEY from backend/.env (must run before the chain is built)
+
 import logging
 import os
 import shutil
@@ -16,8 +18,6 @@ from chain import build_chain
 from chunks import SUPPORTED_EXTENSIONS, validate_file
 from embed import embed_and_store, get_embeddings, reset_db
 from hybrid import build_hybrid_reranker, get_cross_encoder
-
-load_dotenv()
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -56,17 +56,18 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# Frontend addresses allowed to call this API. Set FRONTEND_URL on the host
+# (for example https://your-app.vercel.app) to allow your deployed frontend.
+ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if os.getenv("FRONTEND_URL"):
+    ALLOWED_ORIGINS.append(os.getenv("FRONTEND_URL").rstrip("/"))
+
 app = FastAPI(title="Chat with Your Docs API", lifespan=lifespan)
 
 # Allow the React dev server to call this API from the browser
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        ],
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
