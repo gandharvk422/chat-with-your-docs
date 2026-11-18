@@ -61,7 +61,12 @@ app = FastAPI(title="Chat with Your Docs API", lifespan=lifespan)
 # Allow the React dev server to call this API from the browser
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
