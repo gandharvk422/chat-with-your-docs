@@ -271,6 +271,12 @@ export default function App() {
                   <Send size={22} />
                 </button>
               </div>
+              <p className="credit">
+                Created by{" "}
+                <a href="https://github.com/gandharvk422" target="_blank" rel="noopener noreferrer">
+                  Gandharv Kulkarni
+                </a>
+              </p>
             </section>
           </>
         )}

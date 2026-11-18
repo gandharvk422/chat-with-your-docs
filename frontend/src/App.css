@@ -571,6 +571,23 @@ h3 .ok {
   cursor: not-allowed;
 }
 
+/* Credit line under the message box */
+.credit {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.credit a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.credit a:hover {
+  text-decoration: underline;
+}
+
 /* ==========================================================================
    Responsive (tablet and mobile)
    ========================================================================== */
