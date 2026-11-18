@@ -1,26 +1,21 @@
-# FastAPI backend dependencies
-fastapi>=0.163.1
-uvicorn>=0.54.0
-python-multipart>=0.0.34
+# CPU-only PyTorch (the default Linux build bundles CUDA and is multiple GB)
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+
+fastapi
+python-multipart
 python-dotenv
 
-# LangChain and RAG
-langchain-core
+langchain
 langchain-community
 langchain-text-splitters
-langchain-classic
-langchain-chroma
 langchain-huggingface
+langchain-chroma
 langchain-groq
+langchain-classic
 
-# Vector database and retrieval
-chromadb
-rank-bm25
-
-# Embeddings and reranking
 sentence-transformers
-
-# Document processing
+rank_bm25
 pypdf
-docx2txt>=0.9
-python-pptx>=1.0.2
+docx2txt
+python-pptx

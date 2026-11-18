@@ -1,0 +1,6 @@
+chroma_db
+uploads
+__pycache__
+*.pdf
+test_pipeline.py
+.env
