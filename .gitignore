@@ -20,5 +20,6 @@ dist/
 # OS / editor
 .DS_Store
 .vscode/
-backend/test.pdf
+backend/evals/docs
 chroma_db/
+backend/__pycache__
