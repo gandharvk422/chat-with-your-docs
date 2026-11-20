@@ -1,0 +1,274 @@
+[
+  {
+    "id": "q01",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "What are the four parts of Bayes' theorem and what does each one mean?",
+    "answer": "Posterior P(A|B) is the updated belief about A after seeing evidence B; likelihood P(B|A) is how probable the evidence is if A is true; prior P(A) is the belief about A before any evidence; evidence P(B) is the total probability of seeing B, which acts as a normalizer.",
+    "reference": "Bayes' Theorem chapter, PDF page 163"
+  },
+  {
+    "id": "q02",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "In the book's medical test example, a disease affects 1 in 10,000 people and the test is 99% accurate. What is the probability of being sick after a positive test?",
+    "answer": "About 0.98%, which is less than 1%. The prior dominates, so most positive results are false alarms.",
+    "reference": "Bayes' Theorem chapter, PDF pages 163-164"
+  },
+  {
+    "id": "q03",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "According to the Bias-Variance Tradeoff chapter, what does expected prediction error decompose into?",
+    "answer": "Bias squared plus variance plus irreducible noise.",
+    "reference": "Bias-Variance Tradeoff chapter, PDF page 437"
+  },
+  {
+    "id": "q04",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "What does L1 (Lasso) regularization do, according to the book?",
+    "answer": "It pushes some weights exactly to zero, which performs feature selection.",
+    "reference": "Bias-Variance Tradeoff chapter, PDF page 438"
+  },
+  {
+    "id": "q05",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "Which three kinds of drift does the model monitoring chapter distinguish, and which part of the distribution changes in each?",
+    "answer": "Covariate drift changes P(x); prior drift changes P(y); concept drift changes P(y|x).",
+    "reference": "Monitoring Models in Production chapter, PDF page 540"
+  },
+  {
+    "id": "q06",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "Why is accuracy misleading on imbalanced data? Use the book's example.",
+    "answer": "With 990 negative and 10 positive samples, a model that always predicts negative gets 99.0% accuracy but catches none of the positives, so recall, F1 and MCC are 0.",
+    "reference": "Handling Imbalanced Data chapter, PDF pages 505-506"
+  },
+  {
+    "id": "q07",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "reasoning",
+    "question": "How does the book describe a high-variance model in terms of training and test error, and where is the worst place to be in the double descent picture?",
+    "answer": "A high-variance (overfit) model has low training error, high test error and a large gap between them. The worst place to be is right at the interpolation threshold, where variance peaks and test error spikes.",
+    "reference": "Bias-Variance Tradeoff chapter, PDF pages 437-438"
+  },
+  {
+    "id": "q08",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "question": "What three reasons does the Docker for AI chapter give for why AI projects need Docker more than most?",
+    "answer": "GPU drivers are fragile (CUDA toolkit is isolated in the container), model weights are large (volumes avoid re-downloading), and multi-service architectures are common (Docker Compose orchestrates them).",
+    "reference": "Docker for AI chapter, PDF pages 36-37"
+  },
+  {
+    "id": "q09",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "unanswerable",
+    "question": "What learning rate does the book recommend for training GPT-4?",
+    "answer": "NOT_IN_DOCUMENT",
+    "reference": "Not covered in Volume 1"
+  },
+  {
+    "id": "q10",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "question": "Who founded Stoicism, and where and roughly when?",
+    "answer": "Zeno of Citium founded it in the ancient Agora of Athens around 300 BCE.",
+    "reference": "PDF page 1"
+  },
+  {
+    "id": "q11",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "question": "Which four cardinal virtues did the Stoics practice?",
+    "answer": "Prudence, fortitude, temperance and justice.",
+    "reference": "Ethics section, PDF page 7"
+  },
+  {
+    "id": "q12",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "question": "Why was the name 'Zenonism' dropped?",
+    "answer": "Probably because the Stoics did not consider their founders to be perfectly wise, and to avoid the philosophy becoming a cult of personality.",
+    "reference": "PDF page 2"
+  },
+  {
+    "id": "q13",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "question": "Which five basic argument forms (indemonstrables) did Chrysippus list?",
+    "answer": "Modus ponens, modus tollens, modus ponendo tollens, strong modus tollendo ponens and strong modus ponendo tollens.",
+    "reference": "Indemonstrable arguments, PDF page 4"
+  },
+  {
+    "id": "q14",
+    "doc": "Stoicism.pdf",
+    "type": "reasoning",
+    "question": "How did Stoicism influence modern psychotherapy?",
+    "answer": "Stoic philosophy was the original inspiration for cognitive psychotherapy, particularly through Albert Ellis's rational emotive behavior therapy (REBT), the major precursor of CBT. Beck's cognitive therapy manual says its philosophical origins trace back to the Stoics, and an Epictetus quotation about judgments was taught to REBT clients.",
+    "reference": "Psychology and psychotherapy section, PDF page 11"
+  },
+  {
+    "id": "q15",
+    "doc": "Stoicism.pdf",
+    "type": "reasoning",
+    "question": "How did Chrysippus view the passions, which four headings did the Stoics arrange them under, and what do wise people experience instead?",
+    "answer": "Chrysippus saw the passions as evaluative judgements that arise from a failure to reason correctly. They were arranged under distress, pleasure (delight), fear and lust. The wise person is free of the passions and experiences good feelings (eupatheia): joy, wish and caution.",
+    "reference": "Passions section, PDF page 8"
+  },
+  {
+    "id": "q16",
+    "doc": "Stoicism.pdf",
+    "type": "unanswerable",
+    "question": "On what date and in which place did Zeno of Citium die?",
+    "answer": "NOT_IN_DOCUMENT",
+    "reference": "Not covered in the article"
+  },
+  {
+    "id": "q17",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "question": "Who wrote the paper, and at which institution was the author based?",
+    "answer": "Saroj Sharma, Department of Basic Principles, Institute of Medical Sciences, Banaras Hindu University, Varanasi.",
+    "reference": "Document header"
+  },
+  {
+    "id": "q18",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "question": "What are the eight limbs (eightfold means) of yoga listed in the paper?",
+    "answer": "Yama, Niyama, Asana, Pranayama, Pratyahara, Dharana, Dhyana and Samadhi.",
+    "reference": "Influence of Yoga section"
+  },
+  {
+    "id": "q19",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "question": "Which state from the Bhagavad Gita does the paper say is similar to the 'alpha experience'?",
+    "answer": "Sthitprajna.",
+    "reference": "Bhagavad Gita section"
+  },
+  {
+    "id": "q20",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "question": "What did Patel et al. (1975) observe about yoga and biofeedback therapy?",
+    "answer": "They observed a significant fall in blood pressure following yoga and biofeedback therapy.",
+    "reference": "Influence of Yoga section"
+  },
+  {
+    "id": "q21",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "reasoning",
+    "question": "What does the paper conclude about the relationship between biofeedback training and ancient Indian philosophy?",
+    "answer": "Biofeedback training depends on the ancient philosophical concept of mind-body integration; mind and body are not divided. Indian philosophy forms a basis for further investigation, and a synthesis of ancient Indian philosophy and biofeedback training can serve as tools for self regulation.",
+    "reference": "Conclusions section"
+  },
+  {
+    "id": "q22",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "unanswerable",
+    "question": "What was the sample size of the Patel et al. trial?",
+    "answer": "NOT_IN_DOCUMENT",
+    "reference": "Not covered in the paper"
+  },
+  {
+    "id": "q23",
+    "doc": "README.md",
+    "type": "lookup",
+    "question": "Which LLM provider and model does the app use to generate answers?",
+    "answer": "Groq, with the openai/gpt-oss-120b model.",
+    "reference": "Features and Tech stack"
+  },
+  {
+    "id": "q24",
+    "doc": "README.md",
+    "type": "lookup",
+    "question": "Which file types can users upload?",
+    "answer": "PDF, DOCX, PPTX, TXT, MD and CSV.",
+    "reference": "Features"
+  },
+  {
+    "id": "q25",
+    "doc": "README.md",
+    "type": "lookup",
+    "question": "What weights does the hybrid retrieval use for keyword and vector search?",
+    "answer": "BM25 keyword search 40% and vector similarity 60%.",
+    "reference": "Features"
+  },
+  {
+    "id": "q26",
+    "doc": "README.md",
+    "type": "lookup",
+    "question": "What is the upload size limit?",
+    "answer": "20 MB.",
+    "reference": "Features"
+  },
+  {
+    "id": "q27",
+    "doc": "README.md",
+    "type": "reasoning",
+    "question": "What happens to the loaded document when a new file is uploaded, and why is that a limitation?",
+    "answer": "The loaded document is kept in memory for the whole server, so a new upload replaces it for every user, and the document is lost when the server restarts.",
+    "reference": "Limitations"
+  },
+  {
+    "id": "q28",
+    "doc": "README.md",
+    "type": "unanswerable",
+    "question": "Which database does the app use to store user accounts?",
+    "answer": "NOT_IN_DOCUMENT",
+    "reference": "Not covered in the README"
+  },
+  {
+    "id": "q29",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "question": "What degree did Gandharv Kulkarni earn, from which college, and with what GPA?",
+    "answer": "A Bachelor of Technology with a major in Artificial Intelligence from G H Raisoni College of Engineering & Management, Pune, with a cumulative GPA of 7.29/10.0.",
+    "reference": "Education"
+  },
+  {
+    "id": "q30",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "question": "What accuracy did his CNN on CIFAR-10 achieve during his internship?",
+    "answer": "85.2%, using data augmentation and dropout.",
+    "reference": "Experience, Skyhighes Technologies"
+  },
+  {
+    "id": "q31",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "question": "Which tools did he use in the end-to-end ML pipeline project, and what was the best R2 score?",
+    "answer": "FastAPI, Docker, MLflow and GitHub Actions; the best R2 score was 0.905 with tuned XGBoost.",
+    "reference": "Projects"
+  },
+  {
+    "id": "q32",
+    "doc": "test.pdf",
+    "type": "reasoning",
+    "question": "At which two companies has he worked, and in which roles?",
+    "answer": "Cognizant Technology Solutions as a Programmer Analyst Trainee (Nov 2025 - Apr 2026) and Skyhighes Technologies as an Artificial Intelligence - Machine Learning Intern (Jun 2024 - Dec 2024).",
+    "reference": "Experience"
+  },
+  {
+    "id": "q33",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "question": "How many REST APIs did he build at Cognizant, and with which technologies?",
+    "answer": "10+ REST APIs using C# and Entity Framework.",
+    "reference": "Experience, Cognizant"
+  },
+  {
+    "id": "q34",
+    "doc": "test.pdf",
+    "type": "unanswerable",
+    "question": "From which university did he receive his master's degree?",
+    "answer": "NOT_IN_DOCUMENT",
+    "reference": "Not covered in the resume"
+  }
+]
