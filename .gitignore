@@ -23,3 +23,4 @@ dist/
 backend/evals/docs
 chroma_db/
 backend/__pycache__
+backend/evals/results*.json

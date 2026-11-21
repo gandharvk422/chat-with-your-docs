@@ -1,4 +1,5 @@
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).parent    # backend/evals
@@ -46,14 +47,69 @@ def build_pipeline(path):
     chain = build_chain(retrieve)
     return vectorstore, chunks, chain, seen
 
-# Temporary check, delete later
-if __name__ == '__main__':
-    reset_db()
-    vectorstore, chunks, chain, seen = build_pipeline(DOCS_DIR / "test.pdf")
-    print("chunks created:", len(chunks))
+def ask(chain, seen, question, tries = 4):
+    """Ask one question. Retries with a growing pause if the call fails."""
+    for attempt in range(tries):
+        try:
+            seen["docs"] = []   # clear leftovers from the previous question
+            result = chain.invoke(question)
+            contexts = [d.page_content for d in seen["docs"]]
+            return result, contexts
+        except Exception as e:
+            if attempt == tries - 1:
+                return {"answer": f"ERROR: {e}", "sources": []}, []
+            time.sleep(2 ** (attempt + 1))      # wait 2 secs, then 4 secs, and then 8 secs
+            
+def build_row(q, result, contexts):
+    """Everything about one question, in one dictionary."""
+    return {
+        "id": q["id"],
+        "doc": q["doc"],
+        "type": q["type"],
+        "question": q["question"],
+        "answer": result["answer"],
+        "contexts": contexts,
+        "ground_truth": q["answer"],
+        "reference": q["reference"],
+        "sources": result["sources"]
+    }
     
-    result = chain.invoke("What degree did Gandharv Kulkarni earn?")
-    print("answer:", result["answer"])
-    print("source:", result["sources"])
-    print("chunks the LLM saw:", len(seen["docs"]))
-    print("first chunk starts:", seen["docs"][0].page_content[:100])
+def save_results(rows):
+    OUT.write_text(json.dumps(rows, indent = 2, ensure_ascii = False), encoding = "utf-8")
+    
+def main(only = None):
+    reset_db()
+    rows = []
+    
+    for doc_name, qs in load_questions().items():
+        if only and only.lower() not in doc_name.lower():
+            continue    # skipping documents that weren't asked to run
+        
+        path = DOCS_DIR / doc_name
+        
+        if not path.exists():
+            print(f"!! file missing, skipping: {doc_name}")
+            continue
+        
+        print(f"\n=== {doc_name} ({len(qs)} questions) ===")
+        print("embedding the document...")
+        vectorstore, chunks, chain, seen = build_pipeline(path)
+        print(f"{len(chunks)} chunks ready")
+        
+        
+        for q in qs:
+            result, contexts = ask(chain, seen, q["question"])
+            rows.append(build_row(q, result, contexts))
+            print(f"    {q['id']} [{q['type']}] done")
+        
+        try:
+            vectorstore.delete_collection()
+        except Exception:
+            pass    # cleanup only; not worth stopping the run
+        
+        save_results(rows)
+        
+    print(f"\nSaved {len(rows)} rows to {OUT}")
+
+if __name__ == '__main__':
+    main(only = sys.argv[1] if len(sys.argv) > 1 else None)
