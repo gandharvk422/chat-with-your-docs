@@ -1,3 +1,4 @@
+import re
 import sys
 import time
 from pathlib import Path
@@ -54,6 +55,10 @@ def ask(chain, seen, question, tries = 4):
             seen["docs"] = []   # clear leftovers from the previous question
             result = chain.invoke(question)
             contexts = [d.page_content for d in seen["docs"]]
+            result["retrieved_pages"] = sorted(
+                {d.metadata["page"] + 1 for d in seen["docs"]
+                 if d.metadata.get("page") is not None}
+            )
             return result, contexts
         except Exception as e:
             if attempt == tries - 1:
@@ -71,8 +76,36 @@ def build_row(q, result, contexts):
         "contexts": contexts,
         "ground_truth": q["answer"],
         "reference": q["reference"],
-        "sources": result["sources"]
+        "sources": result["sources"],
+        "retrieved_pages": result.get("retrieved_pages", []),
     }
+    
+def add_refusal_check(row):
+    """Adds two fields: did the bot refuse, and was that the right call?"""
+    refused = REFUSAL_PHRASE in row["answer"].lower()
+    should_refuse = row["type"] == "unanswerable"
+    row["refused"] = refused
+    row["refusal_correct"] = refused == should_refuse
+    return row
+
+def expected_pages(reference):
+    """'PDF pages 163-164' -> {163, 164}. 'Education' (no page) -> None."""
+    m = re.search(r"pages?\s+(\d+)(?:\s*-\s*(\d+))?", reference)
+    if not m:
+        return None
+    start = int(m.group(1))
+    end = int(m.group(2) or start)
+    return set(range(start, end + 1))
+
+def add_page_check(row):
+    """page_hit = True/False for PDF questions, None when there is nothing to check."""
+    pages = None if row["type"] == "unanswerable" else expected_pages(row["reference"])
+    if pages is None:
+        row["page_hit"] = None
+    else:
+        row["page_hit"] = bool(pages & set(row["retrieved_pages"]))
+    
+    return row
     
 def save_results(rows):
     OUT.write_text(json.dumps(rows, indent = 2, ensure_ascii = False), encoding = "utf-8")
@@ -99,7 +132,7 @@ def main(only = None):
         
         for q in qs:
             result, contexts = ask(chain, seen, q["question"])
-            rows.append(build_row(q, result, contexts))
+            rows.append(add_page_check(add_refusal_check(build_row(q, result, contexts))))
             print(f"    {q['id']} [{q['type']}] done")
         
         try:
@@ -112,4 +145,22 @@ def main(only = None):
     print(f"\nSaved {len(rows)} rows to {OUT}")
 
 if __name__ == '__main__':
-    main(only = sys.argv[1] if len(sys.argv) > 1 else None)
+    arg = sys.argv[1] if len(sys.argv) > 1 else None
+    
+    if arg == "check":      # temporary
+        rows = json.loads((HERE / "results.json").read_text(encoding="utf-8"))
+        
+        for r in rows:
+            add_refusal_check(r)
+            add_page_check(r)
+        
+        ok = sum(r["refusal_correct"] for r in rows)
+        print(f"refusal correct: {ok}/{len(rows)}")
+        with_pages = [r for r in rows if r["page_hit"] is not None]
+        for r in with_pages:
+            if not r["page_hit"]:
+                print("PAGE MISS:", r["id"], "expected", sorted(expected_pages(r["references"])),
+                      "retrieved", r["retrieved_pages"])
+        print(f"page hit: {sum(r['page_hit'] for r in with_pages)}/{len(with_pages)}")
+    else:
+        main(only = arg)
