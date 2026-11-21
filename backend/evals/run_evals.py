@@ -106,6 +106,27 @@ def add_page_check(row):
         row["page_hit"] = bool(pages & set(row["retrieved_pages"]))
     
     return row
+
+def line(label, rs):
+    """One summary line for a group of rows."""
+    refusal_ok = sum(r["refusal_correct"] for r in rs)
+    false_refusals = sum(r["refused"] and r["type"] != "unanswerable" for r in rs)
+    hallucinations = sum((not r["refused"] and r["type"] == "unanswerable" for r in rs))
+    paged = [r for r in rs if r["page_hit"] is not None]
+    page = f"{sum(r['page_hit'] for r in paged)}/{len(paged)}" if paged else "-"
+    print(f"{label:42} n={len(rs):2}    refusal={refusal_ok}/{len(rs)}  "
+          f"false_refusals={false_refusals}     hallucinations={hallucinations}     page_hit={page}")
+
+def print_summary(rows):
+    print()
+    line("ALL", rows)
+    for t in ("lookup", "reasoning", "unanswerable"):
+        group = [r for r in rows if r["type"] == t]
+        if group:
+            line(t, group)
+    print()
+    for d in dict.fromkeys(r["doc"] for r in rows):     # unique docs, in order
+        line(d, [r for r in rows if r["doc"] == d])
     
 def save_results(rows):
     OUT.write_text(json.dumps(rows, indent = 2, ensure_ascii = False), encoding = "utf-8")
@@ -143,24 +164,14 @@ def main(only = None):
         save_results(rows)
         
     print(f"\nSaved {len(rows)} rows to {OUT}")
+    print_summary(rows)
 
 if __name__ == '__main__':
     arg = sys.argv[1] if len(sys.argv) > 1 else None
-    
-    if arg == "check":      # temporary
+
+    if arg == "check":
         rows = json.loads((HERE / "results.json").read_text(encoding="utf-8"))
-        
-        for r in rows:
-            add_refusal_check(r)
-            add_page_check(r)
-        
-        ok = sum(r["refusal_correct"] for r in rows)
-        print(f"refusal correct: {ok}/{len(rows)}")
-        with_pages = [r for r in rows if r["page_hit"] is not None]
-        for r in with_pages:
-            if not r["page_hit"]:
-                print("PAGE MISS:", r["id"], "expected", sorted(expected_pages(r["references"])),
-                      "retrieved", r["retrieved_pages"])
-        print(f"page hit: {sum(r['page_hit'] for r in with_pages)}/{len(with_pages)}")
+        rows = [add_page_check(add_refusal_check(r)) for r in rows]
+        print_summary(rows)
     else:
-        main(only = arg)
+        main(only=arg)
