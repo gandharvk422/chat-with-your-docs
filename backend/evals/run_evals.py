@@ -55,9 +55,6 @@ class DailyLimit(Exception):
 
 def ask(chain, seen, question, tries = 4):
     """Ask one question. Retries with a growing pause if the call fails."""
-    if "tokens per day" in str(e):
-        raise DailyLimit()
-    
     for attempt in range(tries):
         try:
             seen["docs"] = []   # clear leftovers from the previous question
@@ -69,6 +66,8 @@ def ask(chain, seen, question, tries = 4):
             )
             return result, contexts
         except Exception as e:
+            if "tokens per day" in str(e):
+                raise DailyLimit()
             if attempt == tries - 1:
                 return {"answer": f"ERROR: {e}", "sources": []}, []
             time.sleep(2 ** (attempt + 1))      # wait 2 secs, then 4 secs, and then 8 secs
@@ -146,34 +145,38 @@ def main(only = None):
     reset_db()
     rows = []
     
-    for doc_name, qs in load_questions().items():
-        if only and only.lower() not in doc_name.lower():
-            continue    # skipping documents that weren't asked to run
+    try:
+        for doc_name, qs in load_questions().items():
+            if only and only.lower() not in doc_name.lower():
+                continue    # skipping documents that weren't asked to run
+            
+            path = DOCS_DIR / doc_name
+            
+            if not path.exists():
+                print(f"!! file missing, skipping: {doc_name}")
+                continue
+            
+            print(f"\n=== {doc_name} ({len(qs)} questions) ===")
+            print("embedding the document...")
+            vectorstore, chunks, chain, seen = build_pipeline(path)
+            print(f"{len(chunks)} chunks ready")
+            
+            
+            for q in qs:
+                result, contexts = ask(chain, seen, q["question"])
+                rows.append(add_page_check(add_refusal_check(build_row(q, result, contexts))))
+                print(f"    {q['id']} [{q['type']}] done")
+            
+            try:
+                vectorstore.delete_collection()
+            except DailyLimit:
+                print("\nGroq daily token limit reached. Saving what finished.")
+            
+            save_results(rows)
+    except DailyLimit:
+        print("\nGroq daily token limit reached. Saving what finished.")
         
-        path = DOCS_DIR / doc_name
-        
-        if not path.exists():
-            print(f"!! file missing, skipping: {doc_name}")
-            continue
-        
-        print(f"\n=== {doc_name} ({len(qs)} questions) ===")
-        print("embedding the document...")
-        vectorstore, chunks, chain, seen = build_pipeline(path)
-        print(f"{len(chunks)} chunks ready")
-        
-        
-        for q in qs:
-            result, contexts = ask(chain, seen, q["question"])
-            rows.append(add_page_check(add_refusal_check(build_row(q, result, contexts))))
-            print(f"    {q['id']} [{q['type']}] done")
-        
-        try:
-            vectorstore.delete_collection()
-        except DailyLimit:
-            print("\nGroq daily token limit reached. Saving what finished.")
-        
-        save_results(rows)
-        
+    save_results(rows)
     print(f"\nSaved {len(rows)} rows to {OUT}")
     print_summary(rows)
 

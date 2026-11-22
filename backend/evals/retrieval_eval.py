@@ -17,10 +17,10 @@ STOP = {"about", "which", "their", "there", "these", "those", "where", "after",
         "while", "every", "using", "since", "first", "three", "four", "five"}
 
 CONFIGS = {
-    "baseline":  {"CHUNK_SIZE": "800",  "CHUNK_OVERLAP": "100", "RETRIEVER_K": "5"},
-    "k10":       {"CHUNK_SIZE": "800",  "CHUNK_OVERLAP": "100", "RETRIEVER_K": "10"},
-    "chunk1200": {"CHUNK_SIZE": "1200", "CHUNK_OVERLAP": "200", "RETRIEVER_K": "5"},
-    "k10_chunk1200": {"CHUNK_SIZE": "1200", "CHUNK_OVERLAP": "200", "RETRIEVER_K": "10"},
+    "baseline":   {"CHUNK_SIZE": "800", "CHUNK_OVERLAP": "100", "RETRIEVER_K": "5"},
+    "k10":        {"CHUNK_SIZE": "800", "CHUNK_OVERLAP": "100", "RETRIEVER_K": "10"},
+    "pdfium":     {"PDF_LOADER": "pdfium", "CHUNK_SIZE": "800", "CHUNK_OVERLAP": "100", "RETRIEVER_K": "5"},
+    "pdfium_k10": {"PDF_LOADER": "pdfium", "CHUNK_SIZE": "800", "CHUNK_OVERLAP": "100", "RETRIEVER_K": "10"},
 }
 
 def key_terms(text):
@@ -34,6 +34,7 @@ def term_recall(ground_truth, contexts):
     return sum(t in blob for t in terms) / len(terms)
 
 def run_config(env, only):
+    os.environ.pop("PDF_LOADER", None)  # start every config with the default loader
     os.environ.update(env)  # takes effect when embed_and_store / build_hybrid_reranker run
     scores, sizes, sizes6 = {}, [], []
     for doc_name, qs in load_questions().items():

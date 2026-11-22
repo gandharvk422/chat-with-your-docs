@@ -25,6 +25,9 @@ def _read_text(path):
 
 
 def _load_pdf(path):
+    if os.getenv("PDF_LOADER") == "pdfium":
+        from langchain_community.document_loaders import PyPDFium2Loader
+        return PyPDFium2Loader(path).load()
     return PyPDFLoader(path).load()
 
 
