@@ -1,5 +1,6 @@
 import csv
 import io
+import os
 from pathlib import Path
 
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader
@@ -99,8 +100,8 @@ def fetch_doc(file):
 def chunk_doc(docs):
     """Split the Documents into smaller chunk Documents."""
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=100,
+        chunk_size=int(os.getenv("CHUNK_SIZE", "800")),
+        chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "100")),
         separators=["\n\n", "\n", ". ", " ", ""],
     )
     return splitter.split_documents(docs)

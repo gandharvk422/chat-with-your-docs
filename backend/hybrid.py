@@ -1,6 +1,7 @@
 from langchain_classic.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from sentence_transformers import CrossEncoder
+import os
 
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
@@ -19,12 +20,13 @@ def build_hybrid_reranker(chunks, vectorstore):
     Build the hybrid (BM25 + vector) retriever and the cross-encoder ONCE.
     Returns a function: hybrid_rerank(query, top_n) -> [(score, doc), ...]
     """
+    k = int(os.getenv("RETRIEVER_K", "5"))
     # Vector retriever from the existing ChromaDB
-    vector_retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+    vector_retriever = vectorstore.as_retriever(search_kwargs={"k": k})
 
     # BM25 keyword retriever built from the chunks
     bm25_retriever = BM25Retriever.from_documents(chunks)
-    bm25_retriever.k = 5
+    bm25_retriever.k = k
 
     # Hybrid: 40% BM25 + 60% vector similarity
     hybrid_retriever = EnsembleRetriever(
