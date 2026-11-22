@@ -1,0 +1,292 @@
+[
+  {
+    "id": "q01",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.963,
+    "context_precision": 0.917,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q02",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.824,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q03",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.84,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q04",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.911,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q05",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 0.5,
+    "answer_relevancy": 0.826,
+    "context_precision": 1.0,
+    "context_recall": 0.667
+  },
+  {
+    "id": "q06",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.74,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q07",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "reasoning",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.737,
+    "context_precision": 0.639,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q08",
+    "doc": "Volume 1 - Foundations.pdf",
+    "type": "lookup",
+    "refused": true,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": 1.0,
+    "context_recall": 0.667
+  },
+  {
+    "id": "q10",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.96,
+    "context_precision": 0.806,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q11",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.983,
+    "context_precision": 1.0,
+    "context_recall": 1.0
+  },
+  {
+    "id": "q12",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q13",
+    "doc": "Stoicism.pdf",
+    "type": "lookup",
+    "refused": true,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q14",
+    "doc": "Stoicism.pdf",
+    "type": "reasoning",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q15",
+    "doc": "Stoicism.pdf",
+    "type": "reasoning",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q17",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q18",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q19",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q20",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q21",
+    "doc": "Philosophical Basis of Biofeedback.docx",
+    "type": "reasoning",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q23",
+    "doc": "README.md",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q24",
+    "doc": "README.md",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q25",
+    "doc": "README.md",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q26",
+    "doc": "README.md",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q27",
+    "doc": "README.md",
+    "type": "reasoning",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q29",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q30",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q31",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q32",
+    "doc": "test.pdf",
+    "type": "reasoning",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  },
+  {
+    "id": "q33",
+    "doc": "test.pdf",
+    "type": "lookup",
+    "refused": false,
+    "faithfulness": null,
+    "answer_relevancy": null,
+    "context_precision": null,
+    "context_recall": null
+  }
+]
