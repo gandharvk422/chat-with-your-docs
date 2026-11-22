@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import time
@@ -7,7 +8,9 @@ HERE = Path(__file__).parent    # backend/evals
 BACKEND = HERE.parent           # backend
 DOCS_DIR = HERE / "docs"
 QUESTIONS = HERE / "questions.json"
-OUT = HERE / "results.json"
+TOP_N = int(os.getenv("TOP_N", "4"))
+EXP = os.getenv("EXP_NAME")
+OUT = HERE / (f"results_{EXP}.json" if EXP else "results.json")
 
 sys.path.insert(0, str(BACKEND))
 
@@ -19,7 +22,6 @@ from chain import build_chain
 from embed import embed_and_store, reset_db
 from hybrid import build_hybrid_reranker
 
-TOP_N = 4
 REFUSAL_PHRASE = "have enough information"
 
 import json
@@ -48,8 +50,14 @@ def build_pipeline(path):
     chain = build_chain(retrieve)
     return vectorstore, chunks, chain, seen
 
+class DailyLimit(Exception):
+    pass
+
 def ask(chain, seen, question, tries = 4):
     """Ask one question. Retries with a growing pause if the call fails."""
+    if "tokens per day" in str(e):
+        raise DailyLimit()
+    
     for attempt in range(tries):
         try:
             seen["docs"] = []   # clear leftovers from the previous question
@@ -82,10 +90,11 @@ def build_row(q, result, contexts):
     
 def add_refusal_check(row):
     """Adds two fields: did the bot refuse, and was that the right call?"""
+    row["error"] = row["answer"].startswith("ERROR")
     refused = REFUSAL_PHRASE in row["answer"].lower()
     should_refuse = row["type"] == "unanswerable"
     row["refused"] = refused
-    row["refusal_correct"] = refused == should_refuse
+    row["refusal_correct"] = None if row["error"] else refused == should_refuse
     return row
 
 def expected_pages(reference):
@@ -99,7 +108,7 @@ def expected_pages(reference):
 
 def add_page_check(row):
     """page_hit = True/False for PDF questions, None when there is nothing to check."""
-    pages = None if row["type"] == "unanswerable" else expected_pages(row["reference"])
+    pages = None if row["type"] == "unanswerable" or row["error"] else expected_pages(row["reference"])
     if pages is None:
         row["page_hit"] = None
     else:
@@ -109,13 +118,15 @@ def add_page_check(row):
 
 def line(label, rs):
     """One summary line for a group of rows."""
+    errors = sum(r["error"] for r in rs)
+    rs = [r for r in rs if not r["error"]]
     refusal_ok = sum(r["refusal_correct"] for r in rs)
     false_refusals = sum(r["refused"] and r["type"] != "unanswerable" for r in rs)
     hallucinations = sum((not r["refused"] and r["type"] == "unanswerable" for r in rs))
     paged = [r for r in rs if r["page_hit"] is not None]
     page = f"{sum(r['page_hit'] for r in paged)}/{len(paged)}" if paged else "-"
     print(f"{label:42} n={len(rs):2}    refusal={refusal_ok}/{len(rs)}  "
-          f"false_refusals={false_refusals}     hallucinations={hallucinations}     page_hit={page}")
+          f"false_refusals={false_refusals}     hallucinations={hallucinations}     page_hit={page}  errors={errors}")
 
 def print_summary(rows):
     print()
@@ -158,8 +169,8 @@ def main(only = None):
         
         try:
             vectorstore.delete_collection()
-        except Exception:
-            pass    # cleanup only; not worth stopping the run
+        except DailyLimit:
+            print("\nGroq daily token limit reached. Saving what finished.")
         
         save_results(rows)
         
@@ -170,7 +181,7 @@ if __name__ == '__main__':
     arg = sys.argv[1] if len(sys.argv) > 1 else None
 
     if arg == "check":
-        rows = json.loads((HERE / "results.json").read_text(encoding="utf-8"))
+        rows = json.loads(OUT.read_text(encoding="utf-8"))
         rows = [add_page_check(add_refusal_check(r)) for r in rows]
         print_summary(rows)
     else:

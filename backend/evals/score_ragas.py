@@ -12,8 +12,9 @@ from statistics import mean
 HERE = Path(__file__).parent
 load_dotenv(HERE.parent / ".env")
 
-RESULTS = HERE / "results_baseline.json"
-OUT = HERE / "scores_baseline.json"
+EXP = os.getenv("EXP_NAME", "baseline")
+RESULTS = HERE / f"results_{EXP}.json"
+OUT = HERE / f"scores_{EXP}.json"
 METRICS = ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]
 
 client = AsyncOpenAI(
@@ -103,7 +104,7 @@ def is_complete(s):
     
 def main():
     results = json.loads(RESULTS.read_text(encoding="utf-8"))
-    results = [r for r in results if r["type"] != "unanswerable"]
+    results = [r for r in results if r["type"] != "unanswerable" and not r["answer"].startswith("ERROR")]
     
     done = {}
     
