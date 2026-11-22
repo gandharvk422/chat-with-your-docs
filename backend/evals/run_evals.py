@@ -12,6 +12,10 @@ TOP_N = int(os.getenv("TOP_N", "4"))
 EXP = os.getenv("EXP_NAME")
 OUT = HERE / (f"results_{EXP}.json" if EXP else "results.json")
 
+SETTINGS = {f"TOP_N={TOP_N} RETRIEVER_K={os.getenv('RETRIEVER_K', '5')} "
+            f"CHUNK={os.getenv('CHUNK_SIZE', '800')}/{os.getenv('CHUNK_OVERLAP', '100')} "
+            f"PDF_LOADER={os.getenv('PDF_LOADER', 'pypdf')}"}
+
 sys.path.insert(0, str(BACKEND))
 
 from dotenv import load_dotenv
@@ -85,6 +89,7 @@ def build_row(q, result, contexts):
         "reference": q["reference"],
         "sources": result["sources"],
         "retrieved_pages": result.get("retrieved_pages", []),
+        "settings": SETTINGS,
     }
     
 def add_refusal_check(row):
@@ -138,11 +143,31 @@ def print_summary(rows):
     for d in dict.fromkeys(r["doc"] for r in rows):     # unique docs, in order
         line(d, [r for r in rows if r["doc"] == d])
     
+def load_saved():
+    if not OUT.exists():
+        return {}
+    return {r["id"]: r for r in json.loads(OUT.read_text(encoding = "utf-8"))}
+
+def check_settings():
+    old = {r["settings"] for r in load_saved().values() if r.get("settings")}
+    if old in old != {SETTINGS}:
+        sys.exit(f"{OUT.name} was made with different settings:\n  {old}\n"
+                 f"now:\n  {SETTINGS}\nUse a new EXP_NAME or delete the file.")
+
 def save_results(rows):
-    OUT.write_text(json.dumps(rows, indent = 2, ensure_ascii = False), encoding = "utf-8")
+    saved = load_saved()
+    for r in rows:
+        old = saved.get(r["id"])
+        if r["answer"].startswith("ERROR") and old and not old["answer"].startswith("ERROR"):
+            continue
+        saved[r["id"]] = r
+    OUT.write_text(json.dumps(list(saved.values()), indent = 2, ensure_ascii = False), encoding = "utf-8")
     
 def main(only = None):
     reset_db()
+    print("settings:", SETTINGS)
+    check_settings()
+    done = {i for i, r in load_saved().items() if not r["answer"].startswith("ERROR")} if EXP else set()
     rows = []
     
     try:
@@ -154,6 +179,11 @@ def main(only = None):
             
             if not path.exists():
                 print(f"!! file missing, skipping: {doc_name}")
+                continue
+            
+            qs = [q for q in qs if q["id"] not in done]
+            if not qs:
+                print(f"\n=== {doc_name}: already done, skipping ===")
                 continue
             
             print(f"\n=== {doc_name} ({len(qs)} questions) ===")
