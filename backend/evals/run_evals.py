@@ -14,7 +14,7 @@ OUT = HERE / (f"results_{EXP}.json" if EXP else "results.json")
 
 SETTINGS = (f"TOP_N={TOP_N} RETRIEVER_K={os.getenv('RETRIEVER_K', '5')} "
             f"CHUNK={os.getenv('CHUNK_SIZE', '800')}/{os.getenv('CHUNK_OVERLAP', '100')} "
-            f"PDF_LOADER={os.getenv('PDF_LOADER', 'pypdf')}")
+            f"PDF_LOADER={os.getenv('PDF_LOADER', 'pdfium')}")
 
 sys.path.insert(0, str(BACKEND))
 

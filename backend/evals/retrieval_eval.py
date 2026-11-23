@@ -34,7 +34,7 @@ def term_recall(ground_truth, contexts):
     return sum(t in blob for t in terms) / len(terms)
 
 def run_config(env, only):
-    os.environ.pop("PDF_LOADER", None)  # start every config with the default loader
+    os.environ["PDF_LOADER"] = "pypdf"      # configs without the key keep the old loader
     os.environ.update(env)  # takes effect when embed_and_store / build_hybrid_reranker run
     scores, sizes, sizes6 = {}, [], []
     for doc_name, qs in load_questions().items():

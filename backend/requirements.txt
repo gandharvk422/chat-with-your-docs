@@ -17,5 +17,6 @@ langchain-classic
 sentence-transformers
 rank_bm25
 pypdf
+pypdfium2
 docx2txt
 python-pptx
