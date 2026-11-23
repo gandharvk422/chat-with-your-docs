@@ -181,6 +181,7 @@ Hugging Face models are cached in a Docker volume (`hf_cache`), so they are only
 | `CHUNK_SIZE` | `800` | Characters per chunk |
 | `CHUNK_OVERLAP` | `100` | Overlap between chunks |
 | `RETRIEVER_K` | `5` | Candidates fetched by each retriever (BM25 and vector) |
+| `TOP_N` | `4` | Chunks kept after re-ranking (used by the evals; the app uses 4) |
 | `PDF_LOADER` | – | PDF loader switch used by the evals. By default PyPDFium2 is tried first, falling back to PyPDF; see `_load_pdf` in `chunks.py` for the exact logic |
 
 ### Frontend environment variables
@@ -252,27 +253,78 @@ Scanned PDFs (images of text) are **not** supported — there is no OCR step.
 
 ## 📊 Evaluation
 
-The `backend/evals/` folder contains a small harness for measuring and improving quality:
+The `backend/evals/` folder holds a small harness for measuring answer quality and comparing pipeline settings, so changes can be judged with numbers instead of guesses.
 
-- `questions.json` – 34 questions across several documents, labelled as `lookup`, `reasoning` or `unanswerable` (the last group checks that the bot refuses instead of hallucinating).
-- `run_evals.py` – runs the questions through the real pipeline and records answers, retrieved contexts, page hits, refusal correctness and false refusals/hallucinations.
-- `retrieval_eval.py` – compares retrieval settings (e.g. `RETRIEVER_K` 5 vs 10, PDF loader choice) using term recall.
-- `score_ragas.py` – scores results with RAGAS (faithfulness, answer relevancy, context precision, context recall), using a Groq-hosted judge model.
-- `compare.py` – compares an experiment's results with the baseline, question by question.
+### Test set
 
-Typical workflow (run from `backend/`; the evaluation documents themselves are git-ignored, so place your own files in `backend/evals/docs/` matching the names in `questions.json`):
+`questions.json` has **34 hand-written questions** across five documents, each with an expected answer and a reference page:
+
+| Type | Count | Purpose |
+|------|-------|---------|
+| `lookup` | 23 | A fact that sits in one place in the document |
+| `reasoning` | 6 | Needs several passages combined |
+| `unanswerable` | 5 | Not in the document, so the bot should refuse instead of making something up |
+
+Documents covered: a machine-learning textbook PDF (9 questions), a Stoicism PDF (7), a biofeedback DOCX (6), a Markdown file (6) and a short PDF (6). The documents are git-ignored, so place your own files in `backend/evals/docs/` using the names in `questions.json`.
+
+### How the evaluation works
+
+```
+questions.json ─► run_evals.py ─► results_<EXP>.json ─► score_ragas.py ─► scores_<EXP>.json
+ (questions +      (asks the real     (answers, retrieved    (LLM judge       (per-question
+  answer key)       pipeline)          chunks, sources)       grades them)     scores)
+```
+
+1. **`run_evals.py`** embeds each document, asks its questions through the real pipeline, and saves the answer, the exact chunks the LLM saw and the cited sources. It also runs two checks that need no judge model:
+   - **Refusal check:** unanswerable questions should get *"I don't have enough information"*, and answerable ones should not (flags false refusals).
+   - **Page hit:** whether the reference page appears among the cited sources.
+2. **`score_ragas.py`** grades the answerable questions with [RAGAS](https://docs.ragas.io/), using `openai/gpt-oss-120b` on Groq as the judge and local `bge-small` embeddings:
+   - **Faithfulness:** is the answer supported by the retrieved context?
+   - **Answer relevancy:** does the answer address the question?
+   - **Context precision:** are the retrieved chunks relevant and well ranked?
+   - **Context recall:** did retrieval find what's needed for the expected answer?
+3. **`compare.py`** compares an experiment against the baseline, question by question.
+4. **`retrieval_eval.py`** compares retrieval settings (for example `RETRIEVER_K` and the PDF loader) using term recall, with no judge needed.
+
+Context precision and recall measure the **retriever**; faithfulness and answer relevancy measure the **answer writer**. A low score therefore tells you which stage to fix.
+
+### Baseline results
+
+Saved in `backend/evals/scores_baseline.json` (default settings: chunk size 800, overlap 100, `RETRIEVER_K=5`, `TOP_N=4`).
+
+| Metric | Average | Questions scored |
+|--------|---------|------------------|
+| Faithfulness | **0.944** | 9 |
+| Answer relevancy | **0.865** | 9 |
+| Context precision | **0.936** | 10 |
+| Context recall | **0.933** | 10 |
+
+What the numbers show:
+
+- **Answers stay grounded.** Faithfulness is 1.0 on 8 of the 9 scored questions; the one miss (`q05`, 0.5) also had the lowest context recall (0.67).
+- **Retrieval is strong on lookups.** Lookup questions average about 0.97 context precision.
+- **Reasoning questions are harder.** The one scored reasoning question (`q07`) had context precision 0.64 and answer relevancy 0.74, which suggests retrieval returns extra, loosely related chunks when several passages are needed.
+- **False refusals exist.** Two answerable questions (`q08`, `q13`) were refused as "not enough information", about 7% of the 29 answerable questions.
+
+> **Important:** this baseline is **partial**. Only 10 of the 29 answerable questions have judge scores in the saved file; the rest came back empty, most likely because of rate limits on the free Groq tier. Treat the averages as indicative, not final. Rerun `score_ragas.py` to fill them in. With a set this small, one question moves a category score a lot, so differences of a few points are likely noise.
+
+### Run it yourself
+
+From `backend/`:
 
 ```bash
-# 1. Generate answers (EXP_NAME labels the experiment)
+# 1. Ask the pipeline every question (EXP_NAME labels the experiment)
 EXP_NAME=baseline python evals/run_evals.py
 
-# 2. Score with RAGAS (needs `ragas` – see the dev dependency group in pyproject.toml)
+# 2. Grade the answers with RAGAS
 EXP_NAME=baseline python evals/score_ragas.py
 
-# 3. Try a variation and compare
-RETRIEVER_K=10 EXP_NAME=k10 python evals/run_evals.py
-python evals/compare.py k10
+# 3. Change one setting, re-run, and compare against the baseline
+RETRIEVER_K=10 TOP_N=6 EXP_NAME=k10_n6 python evals/run_evals.py
+python evals/compare.py k10_n6
 ```
+
+On Windows PowerShell, set variables first, for example `$env:EXP_NAME="baseline"`. Tunable settings: `CHUNK_SIZE`, `CHUNK_OVERLAP`, `RETRIEVER_K`, `TOP_N`, `PDF_LOADER`. Generated `results*.json` files are git-ignored.
 
 ## 🧪 Quick Pipeline Test
 
