@@ -104,10 +104,10 @@
     "doc": "Stoicism.pdf",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.963,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q13",
@@ -116,177 +116,177 @@
     "refused": true,
     "faithfulness": null,
     "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "context_precision": 0.0,
+    "context_recall": 0.0
   },
   {
     "id": "q14",
     "doc": "Stoicism.pdf",
     "type": "reasoning",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.787,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q15",
     "doc": "Stoicism.pdf",
     "type": "reasoning",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.842,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q17",
     "doc": "Philosophical Basis of Biofeedback.docx",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.847,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q18",
     "doc": "Philosophical Basis of Biofeedback.docx",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.902,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q19",
     "doc": "Philosophical Basis of Biofeedback.docx",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.891,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q20",
     "doc": "Philosophical Basis of Biofeedback.docx",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.896,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q21",
     "doc": "Philosophical Basis of Biofeedback.docx",
     "type": "reasoning",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 0.6,
+    "answer_relevancy": 0.95,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q23",
     "doc": "README.md",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.877,
+    "context_precision": 0.5,
+    "context_recall": 1.0
   },
   {
     "id": "q24",
     "doc": "README.md",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.998,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q25",
     "doc": "README.md",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.912,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q26",
     "doc": "README.md",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q27",
     "doc": "README.md",
     "type": "reasoning",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.884,
+    "context_precision": 0.75,
+    "context_recall": 1.0
   },
   {
     "id": "q29",
     "doc": "test.pdf",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 0.0,
+    "answer_relevancy": 0.926,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q30",
     "doc": "test.pdf",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.912,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q31",
     "doc": "test.pdf",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.662,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q32",
     "doc": "test.pdf",
     "type": "reasoning",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.786,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   },
   {
     "id": "q33",
     "doc": "test.pdf",
     "type": "lookup",
     "refused": false,
-    "faithfulness": null,
-    "answer_relevancy": null,
-    "context_precision": null,
-    "context_recall": null
+    "faithfulness": 0.5,
+    "answer_relevancy": 0.88,
+    "context_precision": 1.0,
+    "context_recall": 1.0
   }
 ]
